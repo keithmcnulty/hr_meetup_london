@@ -1,0 +1,121 @@
+---
+title: "Force Directed Network Generator"
+output:
+  flexdashboard::flex_dashboard:
+    navbar:
+    - align: right
+      href: https://github.com/keithmcnulty/fd_network_generator
+      icon: fa-github
+    orientation: rows
+    theme: cerulean
+    vertical_layout: scroll
+runtime: shiny
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(igraph)
+library(networkD3)
+```
+
+
+Sidebar {.sidebar}
+-----------------------------------------------
+
+<br>
+
+```{r controls}
+
+# upload file controls (accept .csv or .xlsx)
+
+shiny::mainPanel(
+  shiny::fileInput("edgelist", 
+                   "Upload edge list in csv",
+                   accept = c('.csv')),
+  shiny::uiOutput("gobutton")
+)
+
+output$gobutton <- shiny::renderUI({
+  shiny::req(input$edgelist)
+  
+  shiny::actionButton("go", "Generate Network")
+})
+
+
+```
+
+
+Row {data-height=800}
+------------------------------------------------
+
+### Network {data-height=800}
+
+```{r fd_network_viz}
+
+fd_network_graph <- shiny::eventReactive(input$go, {
+
+  # load csv
+
+  inFile <- input$edgelist
+
+  edgelist <- read.csv(inFile$datapath, stringsAsFactors = FALSE)
+
+  colnames(edgelist) <- toupper(colnames(edgelist))
+
+  # create node indices for D3
+
+  nodes <- data.frame(NAME = c(unique(edgelist$FROM), unique(edgelist$TO))) %>%
+    unique()
+
+  node_index <- nodes %>%
+    dplyr::mutate(NODEID = c(0:(nrow(nodes) - 1)))
+
+  # relabel edgelist
+
+  edgelist <- dplyr::inner_join(edgelist, node_index, by = c("FROM" = "NAME")) %>%
+    dplyr::rename(SOURCE = NODEID) %>%
+    dplyr::inner_join(node_index, by = c("TO" = "NAME")) %>%
+    dplyr::rename(TARGET = NODEID)
+
+  # use igraph to calculate node betweenness centrality
+
+  edgematrix <- as.matrix(edgelist[ ,c("SOURCE", "TARGET")])
+
+  edgematrix <- edgematrix + 1
+
+  igraph_graph <- igraph::graph_from_edgelist(edgematrix, directed = FALSE)
+
+  btwn <- igraph::betweenness(igraph_graph, directed = FALSE)
+
+  btwn_df <- data.frame(NODEID = c(0:(length(btwn) - 1)), BTWN = btwn)
+
+  # add betweenness centrality to node_table
+
+  node_table <- dplyr::inner_join(node_index, btwn_df)
+
+  # create network
+
+  networkD3::forceNetwork(Links = edgelist,
+                          Nodes = node_table,
+                          Source = 'SOURCE',
+                          Target = 'TARGET',
+                          NodeID = 'NAME',
+                          Nodesize = 'BTWN',
+                          Group = 'NAME',
+                          zoom = TRUE,
+                          fontSize = 14,
+                          opacity = 0.7,
+                          fontFamily = "Oswald",
+                          bounded = TRUE)
+
+})
+
+networkD3::renderForceNetwork(
+  fd_network_graph()
+)
+
+
+```

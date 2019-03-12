@@ -1,5 +1,6 @@
 ---
 title: "Force Directed Network Generator"
+author: "Keith McNulty"
 output:
   flexdashboard::flex_dashboard:
     navbar:
@@ -27,6 +28,16 @@ Sidebar {.sidebar}
 
 <br>
 
+**Explanatory Notes**  
+
+1. This is a sample app which generates a force directed network based on an uploaded csv edgelist.  
+2. The edgelist needs to have two columns names "from" and "to".  
+3. The node size in the generated graph represents the betweenness centrality of the node.
+4. Follow the Github link to see the source code. 
+
+<br>
+<br>
+
 ```{r controls}
 
 # upload file controls (accept .csv or .xlsx)
@@ -46,6 +57,8 @@ output$gobutton <- shiny::renderUI({
 
 
 ```
+
+
 
 
 Row {data-height=800}

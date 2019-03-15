@@ -243,7 +243,6 @@ knitr::include_graphics("network-survival.jpg")
 
 * Upload a simple from/to list of connections and instantly generates network viz
 
-* Try it out [here](https://keith-mcnulty.shinyapps.io/fd_network_generator/), and find the code on [Github](https://github.com/keithmcnulty/fd_network_generator).
+* Try it out [here](https://keith-mcnulty.shinyapps.io/fd_network_generator/), and find the code on [Github](https://github.com/keithmcnulty/hr_meetup_london/blob/master/fd_network_generator.Rmd).
 
 # May the force be with you! {data-background-image="darth.png" data-background-size="300px" data-background-position="left top"}
-

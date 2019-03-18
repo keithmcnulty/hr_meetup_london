@@ -103,11 +103,12 @@ fd_network_graph <- shiny::eventReactive(input$go, {
 
   btwn <- igraph::betweenness(igraph_graph, directed = FALSE)
 
-  btwn_df <- data.frame(NODEID = c(0:(length(btwn) - 1)), BTWN = btwn)
+  btwn_df <- data.frame(NODEID = c(0:(length(btwn) - 1)), BTWN = round(btwn, digits = 1))
 
   # add betweenness centrality to node_table
 
-  node_table <- dplyr::inner_join(node_index, btwn_df)
+  node_table <- dplyr::inner_join(node_index, btwn_df) %>% 
+    dplyr::mutate(NODE_ID = paste0(NAME, " (", BTWN, ")"))
 
   # create network
 
@@ -115,13 +116,14 @@ fd_network_graph <- shiny::eventReactive(input$go, {
                           Nodes = node_table,
                           Source = 'SOURCE',
                           Target = 'TARGET',
-                          NodeID = 'NAME',
+                          NodeID = 'NODE_ID',
                           Nodesize = 'BTWN',
                           Group = 'NAME',
                           zoom = TRUE,
                           fontSize = 14,
                           opacity = 0.7,
                           fontFamily = "Oswald",
+                          linkDistance = 200,
                           bounded = TRUE)
 
 })

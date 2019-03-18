@@ -5,7 +5,7 @@ output:
   flexdashboard::flex_dashboard:
     navbar:
     - align: right
-      href: https://github.com/keithmcnulty/fd_network_generator
+      href: https://github.com/keithmcnulty/hr_meetup_london/edit/master/fd_network_generator.Rmd
       icon: fa-github
     orientation: rows
     theme: cerulean
